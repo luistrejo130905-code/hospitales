@@ -77,7 +77,7 @@ CREATE SERVER servidor_ixtapaluca
 
 CREATE SERVER servidor_valle_chalco
     FOREIGN DATA WRAPPER postgres_fdw
-    OPTIONS (host 'aws-0-us-east-1.pooler.supabase.com', port '5432', dbname 'postgres');
+    OPTIONS (host 'aws-1-us-east-2.pooler.supabase.com', port '5432', dbname 'postgres');
 
 CREATE SERVER servidor_amecameca
     FOREIGN DATA WRAPPER postgres_fdw
