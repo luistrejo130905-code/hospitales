@@ -217,3 +217,77 @@ SELECT
   SUM(existencia * precio) AS valor_total_inventario
 FROM inventario_general
 GROUP BY sucursal;
+
+
+-- 1. Crear el rol específico para FDW con contraseña segura
+CREATE ROLE usuario_fdw WITH LOGIN PASSWORD 'TuPasswordSegura2026!';
+
+-- 2. Permitir conexión a la base de datos de Supabase
+GRANT CONNECT ON DATABASE postgres TO usuario_fdw;
+
+-- 3. Permitir acceso al esquema donde creaste tus 6 tablas (normalmente 'public')
+GRANT USAGE ON SCHEMA public TO usuario_fdw;
+
+-- 4. Otorgar permisos DML (consultar, insertar, modificar, eliminar) sobre las 6 tablas existentes
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO usuario_fdw;
+
+-- 5. Otorgar permisos sobre las secuencias (indispensable para hacer INSERT desde el nodo central)
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO usuario_fdw;
+
+-- 6. (Recomendado) Asegurar que tablas o secuencias futuras hereden estos permisos
+ALTER DEFAULT PRIVILEGES IN SCHEMA public 
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO usuario_fdw;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public 
+GRANT USAGE, SELECT ON SEQUENCES TO usuario_fdw;
+
+
+-- 1. Habilitar la extensión FDW
+CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+
+-- 2. Crear los tres servidores externos
+CREATE SERVER servidor_ixtapaluca
+    FOREIGN DATA WRAPPER postgres_fdw
+    OPTIONS (host 'aws-0-us-east-1.pooler.supabase.com', port '5432', dbname 'postgres');
+
+CREATE SERVER servidor_valle_chalco
+    FOREIGN DATA WRAPPER postgres_fdw
+    OPTIONS (host 'aws-0-us-east-1.pooler.supabase.com', port '5432', dbname 'postgres');
+
+CREATE SERVER servidor_amecameca
+    FOREIGN DATA WRAPPER postgres_fdw
+    OPTIONS (host 'aws-0-us-east-1.pooler.supabase.com', port '5432', dbname 'postgres');
+
+-- 3. Mapear tu usuario local (ej. 'postgres') con los roles creados en cada Supabase
+CREATE USER MAPPING FOR postgres
+    SERVER servidor_ixtapaluca
+    OPTIONS (user 'usuario_fdw.ID_PROYECTO_IXTAPALUCA', password 'TuPasswordSegura2026!');
+
+CREATE USER MAPPING FOR postgres
+    SERVER servidor_valle_chalco
+    OPTIONS (user 'usuario_fdw.ID_PROYECTO_VALLE', password 'TuPasswordSegura2026!');
+
+CREATE USER MAPPING FOR postgres
+    SERVER servidor_amecameca
+    OPTIONS (user 'usuario_fdw.ID_PROYECTO_AMECAMECA', password 'TuPasswordSegura2026!');
+
+-- 4. Crear los esquemas locales para aislar cada hospital
+CREATE SCHEMA esquema_ixtapaluca;
+CREATE SCHEMA esquema_valle_chalco;
+CREATE SCHEMA esquema_amecameca;
+
+-- 5. Importar las 6 tablas de cada servidor remoto hacia su esquema correspondiente
+IMPORT FOREIGN SCHEMA public
+    LIMIT TO (pacientes, especialidades, medicos, consultas, medicamentos, tratamientos)
+    FROM SERVER servidor_ixtapaluca
+    INTO esquema_ixtapaluca;
+
+IMPORT FOREIGN SCHEMA public
+    LIMIT TO (pacientes, especialidades, medicos, consultas, medicamentos, tratamientos)
+    FROM SERVER servidor_valle_chalco
+    INTO esquema_valle_chalco;
+
+IMPORT FOREIGN SCHEMA public
+    LIMIT TO (pacientes, especialidades, medicos, consultas, medicamentos, tratamientos)
+    FROM SERVER servidor_amecameca
+    INTO esquema_amecameca;
