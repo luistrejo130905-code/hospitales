@@ -81,7 +81,7 @@ CREATE SERVER servidor_valle_chalco
 
 CREATE SERVER servidor_amecameca
     FOREIGN DATA WRAPPER postgres_fdw
-    OPTIONS (host 'aws-0-us-east-1.pooler.supabase.com', port '5432', dbname 'postgres');
+    OPTIONS (host 'aws-1-us-west-2.pooler.supabase.com', port '5432', dbname 'postgres');
 
 -- 3. Mapear tu usuario local 'postgres' con los roles creados en Supabase
 -- IMPORTANTE: Con el Pooler de Supabase, el user debe llevar el formato: rol.reference_id
