@@ -95,7 +95,7 @@ CREATE USER MAPPING FOR postgres
 
 CREATE USER MAPPING FOR postgres
     SERVER servidor_amecameca
-    OPTIONS (user 'fdw_amecameca.rbqlubvcerlksexibjcj', password 'PasswordAmecameca2026!');
+    OPTIONS (user 'fdw_amecameca.rbqlubvcerlksexibjcj', password '12345');
 
 -- 4. Crear los esquemas correspondientes a cada hospital
 CREATE SCHEMA esquema_ixtapaluca;
