@@ -73,7 +73,7 @@ CREATE EXTENSION IF NOT EXISTS postgres_fdw;
 -- 2. Crear los tres servidores externos
 CREATE SERVER servidor_ixtapaluca
     FOREIGN DATA WRAPPER postgres_fdw
-    OPTIONS (host 'aws-0-us-east-1.pooler.supabase.com', port '5432', dbname 'postgres');
+    OPTIONS (host 'aws-1-us-east-1.pooler.supabase.com', port '5432', dbname 'postgres');
 
 CREATE SERVER servidor_valle_chalco
     FOREIGN DATA WRAPPER postgres_fdw
@@ -87,7 +87,7 @@ CREATE SERVER servidor_amecameca
 -- IMPORTANTE: Con el Pooler de Supabase, el user debe llevar el formato: rol.reference_id
 CREATE USER MAPPING FOR postgres
     SERVER servidor_ixtapaluca
-    OPTIONS (user 'fdw_ixtapaluca.ID_PROYECTO_IXTAPALUCA', password 'PasswordIxtapaluca2026!');
+    OPTIONS (user 'fdw_ixtapaluca.ID_PROYECTO_IXTAPALUCA', password '12345!');
 
 CREATE USER MAPPING FOR postgres
     SERVER servidor_valle_chalco
