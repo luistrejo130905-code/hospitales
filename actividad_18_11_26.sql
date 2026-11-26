@@ -291,3 +291,28 @@ IMPORT FOREIGN SCHEMA public
     LIMIT TO (pacientes, especialidades, medicos, consultas, medicamentos, tratamientos)
     FROM SERVER servidor_amecameca
     INTO esquema_amecameca;
+
+
+
+-- 1. Crear el rol (usuario) exclusivo para la conexión FDW
+CREATE ROLE fdw_ixtapaluca WITH LOGIN PASSWORD 'PasswordIxtapaluca2026!';
+
+-- 2. Permitir que el rol se conecte a la base de datos
+GRANT CONNECT ON DATABASE postgres TO fdw_ixtapaluca;
+
+-- 3. Permitir el uso del esquema 'public' (donde están tus 6 tablas)
+GRANT USAGE ON SCHEMA public TO fdw_ixtapaluca;
+
+-- 4. Dar permisos para consultar, insertar, modificar y eliminar en todas las tablas
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO fdw_ixtapaluca;
+
+-- 5. Dar permisos sobre las secuencias (necesario si tus IDs son SERIAL o IDENTITY)
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO fdw_ixtapaluca;
+
+-- 6. Desactivar Row Level Security (RLS) en tus 6 tablas para que el rol vea todos los registros
+ALTER TABLE public.pacientes DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.especialidades DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.medicos DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.consultas DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.medicamentos DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tratamientos DISABLE ROW LEVEL SECURITY;
