@@ -65,3 +65,55 @@ CREATE TABLE tratamientos (
     cantidad integer NOT NULL CHECK (cantidad > 0),
     indicaciones text
 );
+
+
+-- 1. Habilitar la extensión postgres_fdw
+CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+
+-- 2. Crear los tres servidores externos
+CREATE SERVER servidor_ixtapaluca
+    FOREIGN DATA WRAPPER postgres_fdw
+    OPTIONS (host 'aws-0-us-east-1.pooler.supabase.com', port '5432', dbname 'postgres');
+
+CREATE SERVER servidor_valle_chalco
+    FOREIGN DATA WRAPPER postgres_fdw
+    OPTIONS (host 'aws-0-us-east-1.pooler.supabase.com', port '5432', dbname 'postgres');
+
+CREATE SERVER servidor_amecameca
+    FOREIGN DATA WRAPPER postgres_fdw
+    OPTIONS (host 'aws-0-us-east-1.pooler.supabase.com', port '5432', dbname 'postgres');
+
+-- 3. Mapear tu usuario local 'postgres' con los roles creados en Supabase
+-- IMPORTANTE: Con el Pooler de Supabase, el user debe llevar el formato: rol.reference_id
+CREATE USER MAPPING FOR postgres
+    SERVER servidor_ixtapaluca
+    OPTIONS (user 'fdw_ixtapaluca.ID_PROYECTO_IXTAPALUCA', password 'PasswordIxtapaluca2026!');
+
+CREATE USER MAPPING FOR postgres
+    SERVER servidor_valle_chalco
+    OPTIONS (user 'fdw_valle_chalco.ID_PROYECTO_VALLE', password 'PasswordValle2026!');
+
+CREATE USER MAPPING FOR postgres
+    SERVER servidor_amecameca
+    OPTIONS (user 'fdw_amecameca.ID_PROYECTO_AMECAMECA', password 'PasswordAmecameca2026!');
+
+-- 4. Crear los esquemas correspondientes a cada hospital
+CREATE SCHEMA esquema_ixtapaluca;
+CREATE SCHEMA esquema_valle_chalco;
+CREATE SCHEMA esquema_amecameca;
+
+-- 5. Importar las 6 tablas de cada servidor remoto
+IMPORT FOREIGN SCHEMA public
+    LIMIT TO (pacientes, especialidades, medicos, consultas, medicamentos, tratamientos)
+    FROM SERVER servidor_ixtapaluca
+    INTO esquema_ixtapaluca;
+
+IMPORT FOREIGN SCHEMA public
+    LIMIT TO (pacientes, especialidades, medicos, consultas, medicamentos, tratamientos)
+    FROM SERVER servidor_valle_chalco
+    INTO esquema_valle_chalco;
+
+IMPORT FOREIGN SCHEMA public
+    LIMIT TO (pacientes, especialidades, medicos, consultas, medicamentos, tratamientos)
+    FROM SERVER servidor_amecameca
+    INTO esquema_amecameca;
