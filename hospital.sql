@@ -91,7 +91,7 @@ CREATE USER MAPPING FOR postgres
 
 CREATE USER MAPPING FOR postgres
     SERVER servidor_valle_chalco
-     OPTIONS (user 'fdw_chalco.gwzjlwyheenillxlsxen', password '202326066_Nicol');
+     OPTIONS (user 'fdw_chalco.gwzjlwyheenillxlsxen', password '12345');
 
 CREATE USER MAPPING FOR postgres
     SERVER servidor_amecameca
